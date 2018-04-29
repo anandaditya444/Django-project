@@ -1,0 +1,27 @@
+#config section {
+  margin-bottom: 1rem;
+}
+
+#config .mdc-typography--subheading2 {
+  margin-bottom: 0;
+}
+
+#config .material-icons {
+  vertical-align: middle;
+  margin-right: 1rem;
+  color: var(--mdc-theme-secondary);
+}
+
+#config .mdc-layout-grid__cell > div {
+  float: left;
+}
+
+.input-container .mdc-text-field {
+  max-width: 120px;
+}
+
+#region-canvas {
+  width: 100%;
+  background-image: url('../images/map.jpg');
+  background-size: contain;
+}

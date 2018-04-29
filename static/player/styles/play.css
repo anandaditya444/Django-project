@@ -1,0 +1,42 @@
+#player-container {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  margin: auto;
+  width: 100vw;
+  max-width: 512px;
+}
+
+#player {
+  width: 100vw;
+  max-width: 512px;
+}
+
+#player-controls {
+  background-color: #222;
+  color: var(--mdc-theme-text-icon-on-primary);
+  width: 100%;
+  height: 48px;
+  margin: 0 auto;
+  display: flex;
+  align-content: space-between;
+}
+
+#player-controls div {
+  margin: auto;
+}
+#player-controls .material-icons {
+  padding-right: 16px;
+}
+
+#player-controls #play {
+  font-size: 2rem !important;
+  vertical-align: bottom;
+}
+
+#region-canvas {
+  width: 100%;
+  max-width: 400px;
+  background-image: url('../images/map.jpg');
+  background-size: contain;
+}

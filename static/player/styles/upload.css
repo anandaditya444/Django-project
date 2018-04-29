@@ -1,0 +1,31 @@
+#add-image-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+}
+
+@media (min-width: 400px) {
+  #add-image-fab {
+    right: 2rem;
+    bottom: 2rem;
+  }
+}
+
+.mdc-grid-tile {
+  --mdc-grid-list-tile-width: 250px;
+  width: 250px;
+}
+
+.mdc-grid-tile__secondary {
+  background-color: rgba(0,0,0,.87);
+}
+
+.mdc-grid-tile__icon {
+  cursor: pointer;
+}
+
+input[type=file] {
+  height: 1px;
+  width: 1px;
+  opacity: 0;
+}

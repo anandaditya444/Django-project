@@ -1,0 +1,83 @@
+{% extends 'player/base.html' %}
+{% load static %}
+
+{% block title %}Upload images | {% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'player/styles/upload.css' %}">
+{% endblock %}
+
+{% block toolbar_icon %}
+  <span class="mdc-toolbar__menu-icon">
+    <a href="/"><i class="material-icons">home</i></a>
+  </span>
+{% endblock %}
+
+{% block content %}
+  <form enctype="multipart/form-data" action="" method="POST">
+    {% csrf_token %}
+    <div id="config" class="mdc-layout-grid">
+      <h1 class="mdc-typography--display1">Upload images</h1>
+  
+      <div class="mdc-select" id="select-menu" role="listbox" data-mdc-auto-init="MDCSelect">
+        <div class="mdc-select__surface" tabindex="0">
+          <div class="mdc-select__label">Image type</div>
+          <div class="mdc-select__selected-text"></div>
+          <div class="mdc-select__bottom-line"></div>
+          <input type="text" id="image-type" name="image-type" value="cloud_cover" hidden>
+        </div>
+        <div class="mdc-menu mdc-select__menu">
+          <ul class="mdc-list mdc-menu__items">
+            <li class="mdc-list-item" role="option" tabindex="0" aria-selected>
+              Cloud cover
+            </li>
+          </ul>
+        </div>
+      </div>
+  
+      <p class="mdc-typography--subheading2">
+        Click the <i class="material-icons">add</i> button to add an image.
+        Once done, click the upload button at the bottom to upload the added images.
+      </p>
+    
+      <div class="mdc-grid-list mdc-grid-list--twoline-caption mdc-grid-list--with-icon-align-end">
+        <ul class="mdc-grid-list__tiles" id="tiles-container">
+        </ul>
+      </div>
+  
+      <div id="file-input-container">
+      </div>
+  
+      <div class="button-container">
+        <button class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">Upload</button>
+        <button class="mdc-button" data-mdc-auto-init="MDCRipple">Cancel</button>
+      </div>
+    </div>
+  </form>
+
+  <button class="mdc-fab material-icons mdc-ripple-upgraded"
+          type="button"
+          id="add-image-fab"
+          onclick="addFileInput()"
+          aria-label="Add image">
+    <span class="mdc-fab__icon">add</span>
+  </button>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="{% static 'player/scripts/upload.js' %}"></script>
+  <script>
+    var imageTypeMenu = document.getElementById('select-menu');
+    var imageSelect = new mdc.select.MDCSelect(imageTypeMenu);
+    imageTypeInput = document.getElementById('image-type');
+    imageTypeMenu.addEventListener('MDCSelect:change', function() {
+      var item = imageSelect.selectedOptions[0];
+      switch (item.textContent.trim()) {
+        case 'Cloud cover':
+          imageTypeInput.value = 'cloud_cover';
+          break;
+      }
+    });
+  </script>
+{% endblock %}

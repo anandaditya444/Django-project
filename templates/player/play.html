@@ -1,0 +1,187 @@
+{% extends 'player/base.html' %}
+{% load static %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'player/styles/play.css' %}">
+{% endblock %}
+
+{% block toolbar_controls %}
+  <a class="material-icons mdc-toolbar__icon"
+     href="/config" alt="Settings" aria-label="Settings">
+    settings
+  </a>
+{% endblock %}
+
+{% block content %}
+  <div class="mdc-layout-grid">
+    <section id="player-container">
+      <canvas id="player"></canvas>
+      <div id="player-controls">
+        <div style="display: flex; padding-left: 2rem; padding-right: 2rem">
+          <i class="material-icons" id="jump-to-start" onclick="jumpToStart()">replay</i>
+          <i class="material-icons" id="play-pause" onclick="playPause()">play_arrow</i>
+        </div>
+        <div class="mdc-slider mdc-slider--discrete" tabindex="0" role="slider"
+            aria-valuemin="0" aria-valuemax="4" aria-valuenow="2"
+            aria-label="Select Value" style="margin-right: 2rem">
+          <div class="mdc-slider__track-container">
+            <div class="mdc-slider__track"></div>
+          </div>
+          <div class="mdc-slider__thumb-container">
+            <div class="mdc-slider__pin">
+              <span class="mdc-slider__pin-value-marker"></span>
+            </div>
+            <svg class="mdc-slider__thumb" width="21" height="21">
+              <circle cx="10.5" cy="10.5" r="7.875"></circle>
+            </svg>
+            <div class="mdc-slider__focus-ring"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="mdc-typography--headline">Current configuration</h2>
+      <h3 class="mdc-typography--title">Player type</h3>
+      <p class="mdc-typography--body1">
+        {% if request.session.player_type == 'cloud_cover' %}
+          Cloud cover
+        {% endif %}
+      </p>
+      <h3 class="mdc-typography--title">Time range</h3>
+      <h4 class="mdc-typography--subheading2">Start</h4>
+      <p class="mdc-typography--body1" id="start-datetime">
+        {{ request.session.start_date_time }}
+      </p>
+      <h4 class="mdc-typography--subheading2">End</h4>
+      <p class="mdc-typography--body1" id="end-datetime">
+        {{ request.session.end_date_time }}
+      </p>
+      <h3 class="mdc-typography--title">Selected region</h3>
+      <canvas id="region-canvas"></canvas>
+    </section>
+  </div>
+
+  {% if warning %}
+    <div class="mdc-snackbar"
+        aria-live="assertive"
+        aria-atomic="true"
+        aria-hidden="true">
+      <div class="mdc-snackbar__text"></div>
+      <div class="mdc-snackbar__action-wrapper">
+        <button type="button" class="mdc-snackbar__action-button"></button>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.0/moment.min.js"></script>
+  <script>
+    var startDateTime = document.getElementById('start-datetime');
+    var endDateTime = document.getElementById('end-datetime');
+    startDateTime.innerText = moment(startDateTime.innerText).format('LLL');
+    endDateTime.innerText = moment(endDateTime.innerText).format('LLL');
+  </script>
+  {% if warning %}
+    <script>
+      mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'))
+        .show({
+          message: '{{ warning }}',
+          timeout: 5000,
+          actionText: 'Dismiss',
+          actionHandler: function(){}
+        });
+    </script>
+  {% endif %}
+  <script>
+    var regionCanvas = document.getElementById('region-canvas'),
+      regionContext = regionCanvas.getContext('2d'),
+      rect = {};
+
+    regionCanvas.height = regionCanvas.width;
+
+    var latStartRatio = {{ request.session.lat_start_ratio }};
+    var latEndRatio = {{ request.session.lat_end_ratio }};
+    var longStartRatio = {{ request.session.long_start_ratio }};
+    var longEndRatio = {{ request.session.long_end_ratio }};
+
+    regionContext.fillStyle = 'rgba(33,150,243,0.4)';
+
+    rect.w = (longEndRatio - longStartRatio) * regionCanvas.width;
+    rect.h = (latEndRatio - latStartRatio) * regionCanvas.height;
+    rect.startX = longStartRatio * regionCanvas.width;
+    rect.startY = latStartRatio * regionCanvas.height;
+    regionContext.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+  
+    var playerCanvas = document.getElementById('player');
+    playerCanvas.height = playerCanvas.width;
+    var playerContext = playerCanvas.getContext('2d');
+
+    var image_paths = {{ images | safe }};
+    var image_elements = [];
+
+    for (var i = 0; i < image_paths.length; i++) {
+      var image = document.createElement('img');
+      image.src = image_paths[i];
+      image_elements.push(image);
+    }
+
+    var loaded = 0;
+    for (var i = 0; i < image_elements.length; i++) {
+      image_elements[i].onload = function (e) {
+        loaded++;
+        if (loaded === image_elements.length)
+          draw();
+      }
+    }
+
+    const baseDelayMilliseconds = 100;
+    var delayMilliseconds = baseDelayMilliseconds;
+
+    function draw() {
+      counter = 0,
+        maxNum = image_elements.length - 1,
+        me = this;
+        this._draw = function () {
+          playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+          playerContext.drawImage(image_elements[counter], 0, 0, playerCanvas.width, playerCanvas.height);
+          counter++;
+          if (counter >= maxNum)
+            return;   // all images have been drawn
+
+        setTimeout(me._draw, delayMilliseconds);    // use me instead of this
+      }
+      this._draw();
+    }
+
+    window.onload = draw;
+
+    var playPauseControl = document.getElementById('play-pause');
+    var jumpToStartControl = document.getElementById('jump-to-start');
+    var speedControl = document.getElementById('speed');
+
+    function playPause() {
+      console.log('play / pause');
+    }
+
+    function jumpToStart() {
+      draw();
+    }
+
+    function setSize() {
+      console.log('set size');
+    }
+
+    function setSpeed(speed) {
+      var speedModifier = parseFloat(speed.substr(0, speed.length - 1));
+      delayMilliseconds = baseDelayMilliseconds / speedModifier;
+    }
+
+    var speedSliderValues = ['0.25x', '0.5x', '1x', '2x', '4x'];
+    var speedSlider = new mdc.slider.MDCSlider(document.querySelector('.mdc-slider'));
+    speedSlider.listen('MDCSlider:input', function() {
+      setSpeed(speedSliderValues[speedSlider.value]);
+    });
+  </script>
+{% endblock %}

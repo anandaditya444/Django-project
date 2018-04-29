@@ -1,0 +1,14 @@
+.login-form-container {
+  max-width: 24rem;
+  margin: auto;
+  padding: 2rem;
+}
+
+#login-form > div {
+  width: 100%;
+}
+
+#login-button {
+  width: inherit;
+  margin-top: 2rem;
+}
